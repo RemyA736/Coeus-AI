@@ -254,10 +254,6 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
     else:
         print("ERROR: El archivo JSON especificado no existe.")
 
-
-def evaluate_text_unsupervised(texto):
-	pass
-
 def metricasSRF(docOCR, docProcesado): 
 	from textdistance import Sorensen #dice
 	from textdistance import Jaccard
@@ -278,21 +274,3 @@ def metricasSRF(docOCR, docProcesado):
 
 def evaluate_textstat(texto):
 	pass
-
-def metricasSRF(docOCR, docProcesado): 
-	from textdistance import Sorensen #dice
-	from textdistance import Jaccard
-	from textdistance import Hamming
-
-	jaccard = Jaccard(external=False)
-	jacc= jaccard.similarity(docProcesado,docOCR)
-
-	sorensen = Sorensen(external=False)
-	dice=sorensen.similarity(docProcesado,docOCR)
-
-	hamming = Hamming(external=False)
-	ha=hamming.similarity(docProcesado,docOCR)
-
-	diccionario = {'Hamming' : hamming, 'Jaccard' : jaccard, 'Dice': dice }
-
-	return diccionario

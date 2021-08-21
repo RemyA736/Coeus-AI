@@ -55,42 +55,48 @@ def deskew_tesseract(image):
     # and background to ensure foreground is now "white" and
     # the background is "black"
 
-    rot_data = pytesseract.image_to_osd(image, lang='spa', config='--psm 0 --dpi 300');
-    rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
+	rot_data = pytesseract.image_to_osd(image, lang='spa', config='--psm 0 --dpi 300');
+	rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
 
-    angle = float(rot)
-    if angle == 0:
-        return image  # REVISAR SI FUNCIONA
-    elif angle == 90:
-        return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
-    elif angle == 180:
-        return cv2.rotate(image, cv2.cv2.ROTATE_180)
-    elif angle == 270:
-        return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-    elif angle == 360:
+	angle = float(rot)
+	if angle == 0:
+		return image  # REVISAR SI FUNCIONA
+	elif angle == 90:
+		return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+	elif angle == 180:
+		return cv2.rotate(image, cv2.cv2.ROTATE_180)
+	elif angle == 270:
+		return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
+	elif angle == 360:
 		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
+	else:
+		print("Ángulo:",angle)
+		return image
         
 
 def deskew_cv2(image):
-    contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST,
-                                           cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key = cv2.contourArea, reverse = True)
-    largestContour = contours[0]
-    minAreaRect = cv2.minAreaRect(largestContour)
-    largestContour = contours[0]
-    minAreaRect = cv2.minAreaRect(largestContour)
-    angle = minAreaRect[-1]
-	
-    if angle == 0:
-        return image  # REVISAR SI FUNCIONA
-    elif angle == 90:
-        return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
-    elif angle == 180:
-        return cv2.rotate(image, cv2.cv2.ROTATE_180)
-    elif angle == 270:
-        return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-    elif angle == 360:
-		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
+	contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST,
+										   cv2.CHAIN_APPROX_SIMPLE)
+	contours = sorted(contours, key = cv2.contourArea, reverse = True)
+	largestContour = contours[0]
+	minAreaRect = cv2.minAreaRect(largestContour)
+	largestContour = contours[0]
+	minAreaRect = cv2.minAreaRect(largestContour)
+	angle = minAreaRect[-1]
+
+	if angle == 0:
+		return image  # REVISAR SI FUNCIONA
+	elif angle == 90:
+		return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+	elif angle == 180:
+		return cv2.rotate(image, cv2.cv2.ROTATE_180)
+	elif angle == 270:
+		return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
+	elif angle == 360:
+		return cv2.rotate(image, cv2.cv2.ROTATE_180)
+	else:
+		print("Ángulo:",angle)
+		return image
 
 def remove_borders(image):
 	mask = np.zeros(image.shape, dtype=np.uint8)
@@ -104,7 +110,7 @@ def remove_borders(image):
 
 	return cv2.bitwise_or(image, mask)
 
-def crop_to_text(image):
+def crop_to_text_tesseract(image):
 	img = image
 
 	d = pytesseract.image_to_data(img,
@@ -116,13 +122,13 @@ def crop_to_text(image):
 		cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		cropped_image = img[y:y+h, x:x+w]
 
-def preprocess(image, binarization='adaptive', orientation='cv2'):
+def preprocess(image, binarization='otsu', orientation='cv2'):
 	img = rgb_to_gray(image)
 	img = downscale_img(img, 0.7)
 	img = shadow_removal(img)
 	
 	# Tipo de binarización
-	if binarization = 'otsu':
+	if binarization == 'otsu':
 		T, img_otsu = otsu_binarization(img)
 		img = invert(img_otsu)
 	else:
@@ -130,4 +136,13 @@ def preprocess(image, binarization='adaptive', orientation='cv2'):
 		img = invert(img_binaria)
 	
 	# Corrección de orientación
+	if orientation =='cv2':
+		img = deskew_cv2(img)
+	else:
+		img = deskew_tesseract(img)
+	img = remove_borders(img)
 	
+	return img
+
+def crop_to_text(image):
+	pass
