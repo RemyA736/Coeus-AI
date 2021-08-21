@@ -272,5 +272,61 @@ def metricasSRF(docOCR, docProcesado):
 
 	return diccionario
 
+def evaluate_text_languagetool(texto):
+    import language_tool_python
+    tool = language_tool_python.LanguageTool('es_MX')
+    
+    matches = tool.check(texto)
+    
+    return len(matches)
+
 def evaluate_textstat(texto):
-	pass
+    import textstat
+    textstat.set_lang('es')
+    
+    # Índice de perspicuidad de Szigriszt-Pazos
+    szigriszt_pazos = textstat.szigriszt_pazos(texto)
+    
+    # Fórmula de comprensibilidad de Gutiérrez de Polini
+    gutierrez_polini = textstat.gutierrez_polini(texto)
+    
+    # Conteo de monosílabos
+    monosilabas = textstat.monosyllabcount(texto)
+    
+    return {'szigriszt_pazos': szigriszt_pazos, 
+           'gutierrez_polini': gutierrez_polini,
+           'monosilabas': monosilabas}
+
+def compare_transcriptions_unsupervised(texto1, texto2):
+    # Contadores
+    t1, t2 = 0, 0
+    
+    # Evaluando con textstat
+    tstat1 = evaluate_textstat(texto1)
+    tstat2 = evaluate_textstat(texto2)
+    
+    # Índice de perspicuidad de Szigriszt-Pazos 
+    if tstat1['szigriszt_pazos'] > tstat2['szigriszt_pazos']:
+        t1 += 1
+    elif tstat2['szigriszt_pazos'] > tstat1['szigriszt_pazos']:
+        t2 += 1
+    
+    # Fórmula de comprensibilidad de Gutiérrez de Polini
+    if tstat1['gutierrez_polini'] > tstat2['gutierrez_polini']:
+        t1 += 1
+    elif tstat2['gutierrez_polini'] > tstat1['gutierrez_polini']:
+        t2 += 1
+    
+    # Conteo de monosílabos
+    if tstat1['monosilabas'] < tstat2['monosilabas']:
+        t1 += 1
+    elif tstat2['monosilabas'] < tstat1['monosilabas']:
+        t2 += 1
+    
+    # Conteo de errores detectados por language tool
+    if evaluate_text_languagetool(texto1) < evaluate_text_languagetool(texto2):
+        t1 += 1
+    elif evaluate_text_languagetool(texto2) < evaluate_text_languagetool(texto1):
+        t2 += 1
+    
+    return (t1, t2)
