@@ -274,3 +274,21 @@ def metricasSRF(docOCR, docProcesado):
 
 def evaluate_textstat(texto):
 	pass
+
+
+
+def entity_azure(text,key,endpoint)
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+entidades=[]
+credential = AzureKeyCredential(key)
+client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+try:
+    documents = [texto]
+    result = client.recognize_entities(documents = documents)[0]
+    for entity in result.entities:
+        entidades.append([entity.text,entity.category])
+except Exception as err:
+    print("Encountered exception. {}".format(err))
+return entidades
+
