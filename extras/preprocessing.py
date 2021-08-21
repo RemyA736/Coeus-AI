@@ -122,6 +122,19 @@ def crop_to_text_tesseract(image):
 		cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		cropped_image = img[y:y+h, x:x+w]
 
+def crop_image(image):
+    canny = cv2.Canny(image,20,500)
+    canny = cv2.dilate(canny,None,iterations=5)
+    conts = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    conts = sorted(conts, key=cv2.contourArea,reverse = True)[:1]
+    for c in conts:
+        epsilon = 0.1 * cv2.arcLength(c,True)
+        approx =cv2.approxPolyDP(c, epsilon, True)
+        if len(approx) == 4:
+            x, y, w, h = cv2.boundingRect(approx)
+            image = image[y:y+h, x:x+w]
+    return image
+
 def preprocess(image, binarization='otsu', orientation='cv2'):
 	img = rgb_to_gray(image)
 	img = downscale_img(img, 0.7)
@@ -140,19 +153,11 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 		img = deskew_cv2(img)
 	else:
 		img = deskew_tesseract(img)
+	
+	# Eliminación de los bordes del escaneo
+	img = crop_image(img)
+	
+	# Eliminación de bordes del dibujo
 	img = remove_borders(img)
 	
 	return img
-
-def crop_image(image):
-    canny = cv2.Canny(image,20,500)
-    canny = cv2.dilate(canny,None,iterations=5)
-    conts = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
-    conts = sorted(conts, key=cv2.contourArea,reverse = True)[:1]
-    for c in conts:
-        epsilon = 0.1 * cv2.arcLength(c,True)
-        approx =cv2.approxPolyDP(c, epsilon, True)
-        if len(approx) == 4:
-            x, y, w, h = cv2.boundingRect(approx)
-            image = img[y:y+h, x:x+w]
-    return image
