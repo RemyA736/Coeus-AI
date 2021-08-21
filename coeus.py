@@ -256,6 +256,31 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
 
 
 def evaluate_text_unsupervised(texto):
+<<<<<<< HEAD
+=======
+=======
+def metricasSRF(docOCR, docProcesado): 
+  import os
+  import pandas as pd
+  from textdistance import Sorensen #dice
+  from textdistance import Jaccard
+  from textdistance import Hamming
+
+  jaccard = Jaccard(external=False)
+  jacc= jaccard.similarity(docProcesado,docOCR)
+
+  sorensen = Sorensen(external=False)
+  dice=sorensen.similarity(docProcesado,docOCR)
+
+  hamming = Hamming(external=False)
+  ha=hamming.similarity(docProcesado,docOCR)
+
+  diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice }
+   
+  return diccionario
+def evaluate_textstat(texto):
+>>>>>>> 3030cd5cb35a76c083104c61e60b1a010a27caef
+>>>>>>> 74f7acfccfa5483de17823749043c9b45788b010
 	pass
 
 def metricasSRF(docOCR, docProcesado): 
