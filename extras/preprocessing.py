@@ -144,5 +144,15 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 	
 	return img
 
-def crop_to_text(image):
-	pass
+def crop_image(image):
+    canny = cv2.Canny(image,20,500)
+    canny = cv2.dilate(canny,None,iterations=5)
+    conts = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    conts = sorted(conts, key=cv2.contourArea,reverse = True)[:1]
+    for c in conts:
+        epsilon = 0.1 * cv2.arcLength(c,True)
+        approx =cv2.approxPolyDP(c, epsilon, True)
+        if len(approx) == 4:
+            x, y, w, h = cv2.boundingRect(approx)
+            image = img[y:y+h, x:x+w]
+    return image
