@@ -68,7 +68,7 @@ def deskew_tesseract(image):
     elif angle == 270:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
     elif angle == 360:
-		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
+        return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
         
 
 def deskew_cv2(image):
