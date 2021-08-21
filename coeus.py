@@ -259,24 +259,22 @@ def evaluate_text_unsupervised(texto):
 	pass
 
 def metricasSRF(docOCR, docProcesado): 
-  import os
-  import pandas as pd
-  from textdistance import Sorensen #dice
-  from textdistance import Jaccard
-  from textdistance import Hamming
+	from textdistance import Sorensen #dice
+	from textdistance import Jaccard
+	from textdistance import Hamming
 
-  jaccard = Jaccard(external=False)
-  jacc= jaccard.similarity(docProcesado,docOCR)
+	jaccard = Jaccard(external=False)
+	jacc= jaccard.similarity(docProcesado,docOCR)
 
-  sorensen = Sorensen(external=False)
-  dice=sorensen.similarity(docProcesado,docOCR)
+	sorensen = Sorensen(external=False)
+	dice=sorensen.similarity(docProcesado,docOCR)
 
-  hamming = Hamming(external=False)
-  ha=hamming.similarity(docProcesado,docOCR)
+	hamming = Hamming(external=False)
+	ha=hamming.similarity(docProcesado,docOCR)
 
-  diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice }
-   
-  return diccionario
+	diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice }
+
+	return diccionario
 
 def evaluate_textstat(texto):
 	pass
