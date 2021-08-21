@@ -1,0 +1,13 @@
+{
+  "dataset":"DataName", "data":{
+                                  documento1:{"filepath":algo.jpg,
+                                              "texto_manual":cadenita,
+                                              "texto_easyocr":cadenita,
+                                              "texto_gcloud":cadenita,
+                                              "texto_azure":cadenita,
+                                              "texto_revisado":cadenita+spellcheck,
+                                              "texto_pos":cadenita+entidades
+                                            },
+                                  documento2:{...},
+                               }
+}

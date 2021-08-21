@@ -1,0 +1,6 @@
+*.jpg
+*.JPG
+.ipynb_checkpoints/*
+extras/.ipynb_checkpoints/*
+extras/__pycache__/*
+__pycache__/*
