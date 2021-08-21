@@ -1,7 +1,6 @@
 import os
 import json
 from os.path import splitext
-import os
 
 def gcloud_text_detection(path):
     import io
@@ -26,9 +25,9 @@ def gcloud_text_detection(path):
                 response.error.message))
 
     return str_text
+
 def metricas(docOCR, docProcesado): 
     import fastwer
-    import os
     import pandas as pd
     from os.path import splitext
     from textdistance import Sorensen #dice
@@ -53,6 +52,7 @@ def metricas(docOCR, docProcesado):
     df = pd.DataFrame(columns = ['img_filename', 'Hamming', 'Jaccard', 'Dice'])
     df = df.append({'img_filename': filename, 'Hamming': ha, 'Jaccard': jacc,'Dice': dice }, ignore_index=True)
     print(df) 
+	
 def azure_text_detection(path):
     from azure.cognitiveservices.vision.computervision import ComputerVisionClient
     from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
@@ -201,6 +201,7 @@ def rotate_documents(path_to_docs_dir):
 def languagetool_spell_check(document_text):
     import language_tool_python
     tool = language_tool_python.LanguageTool('es')
+	
     return tool.correct(document_text)
 
 def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
@@ -252,3 +253,6 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
         print("Documentos TXT creados con éxito.")
     else:
         print("ERROR: El archivo JSON especificado no existe.")
+
+def evaluate_textstat(texto):
+	pass

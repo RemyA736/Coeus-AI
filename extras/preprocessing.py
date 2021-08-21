@@ -59,16 +59,17 @@ def deskew_tesseract(image):
     rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
 
     angle = float(rot)
-    if angle > 0:
-        angle = 360 - angle
+    if angle == 0:
+        return image  # REVISAR SI FUNCIONA
     if angle == 90:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
     elif angle == 180:
         return cv2.rotate(image, cv2.cv2.ROTATE_180)
     elif angle == 270:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-    else:
-        return image
+    elif angle == 360:
+		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
+        
 
 def deskew_cv2(image):
     contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST,
