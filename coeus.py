@@ -270,7 +270,7 @@ def metricasSRF(docOCR, docProcesado):
   hamming = Hamming(external=False)
   ha=hamming.similarity(docProcesado,docOCR)
 
-  diccionario = {'Hamming' : hamming, 'Jaccard' : jaccard, 'Dice': dice }
+  diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice }
    
   return diccionario
 def evaluate_textstat(texto):
