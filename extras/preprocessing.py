@@ -116,3 +116,18 @@ def crop_to_text(image):
 		(x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
 		cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		cropped_image = img[y:y+h, x:x+w]
+
+def preprocess(image, binarization='adaptive', ):
+	img = rgb_to_gray(image)
+	img = downscale_img(img, 0.7)
+	img = shadow_removal(img)
+	
+	# Tipo de binarización
+	if binarization = 'otsu':
+		T, img_otsu = otsu_binarization(img)
+		img = invert(img_otsu)
+	else:
+		img_binaria = adaptive_binarization(img)
+		img = invert(img_binaria)
+	
+	

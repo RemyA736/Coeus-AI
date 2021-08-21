@@ -254,5 +254,5 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
     else:
         print("ERROR: El archivo JSON especificado no existe.")
 
-def evaluate_textstat(texto):
+def evaluate_text_unsupervised(texto):
 	pass
