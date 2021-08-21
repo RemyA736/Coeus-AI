@@ -61,14 +61,14 @@ def deskew_tesseract(image):
     angle = float(rot)
     if angle == 0:
         return image  # REVISAR SI FUNCIONA
-    if angle == 90:
+    elif angle == 90:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
     elif angle == 180:
         return cv2.rotate(image, cv2.cv2.ROTATE_180)
     elif angle == 270:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
     elif angle == 360:
-        return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
+		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
         
 
 def deskew_cv2(image):
@@ -80,18 +80,17 @@ def deskew_cv2(image):
     largestContour = contours[0]
     minAreaRect = cv2.minAreaRect(largestContour)
     angle = minAreaRect[-1]
-    if angle > 0:
-        angle = 360 - angle
-    else:
-        pass
-    if angle == 90:
+	
+    if angle == 0:
+        return image  # REVISAR SI FUNCIONA
+    elif angle == 90:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
     elif angle == 180:
         return cv2.rotate(image, cv2.cv2.ROTATE_180)
     elif angle == 270:
         return cv2.rotate(image, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-    else:
-        return image
+    elif angle == 360:
+		return cv2.rotate(image, cv2.cv2.ROTATE_180) # REVISAR SI FUNCIONA
 
 def remove_borders(image):
 	mask = np.zeros(image.shape, dtype=np.uint8)
@@ -117,7 +116,7 @@ def crop_to_text(image):
 		cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		cropped_image = img[y:y+h, x:x+w]
 
-def preprocess(image, binarization='adaptive', ):
+def preprocess(image, binarization='adaptive', orientation='cv2'):
 	img = rgb_to_gray(image)
 	img = downscale_img(img, 0.7)
 	img = shadow_removal(img)
@@ -130,4 +129,5 @@ def preprocess(image, binarization='adaptive', ):
 		img_binaria = adaptive_binarization(img)
 		img = invert(img_binaria)
 	
+	# Corrección de orientación
 	
