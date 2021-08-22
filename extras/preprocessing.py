@@ -3,6 +3,8 @@ import pytesseract
 import urllib
 import numpy as np
 import re
+import spacy
+from dateparser.search import search_dates
 
 # BGR a GrayScale
 def rgb_to_gray(img):
@@ -72,7 +74,7 @@ def deskew_tesseract(image):
 	else:
 		print("Ángulo:",angle)
 		return image
-        
+
 
 def deskew_cv2(image):
 	contours, hierarchy = cv2.findContours(image, cv2.RETR_LIST,
@@ -139,7 +141,7 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 	img = rgb_to_gray(image)
 	img = downscale_img(img, 0.7)
 	img = shadow_removal(img)
-	
+
 	# Tipo de binarización
 	if binarization == 'otsu':
 		T, img_otsu = otsu_binarization(img)
@@ -147,17 +149,49 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 	else:
 		img_binaria = adaptive_binarization(img)
 		img = invert(img_binaria)
-	
+
 	# Corrección de orientación
 	if orientation =='cv2':
 		img = deskew_cv2(img)
 	else:
 		img = deskew_tesseract(img)
-	
+
 	# Eliminación de los bordes del escaneo
 	img = crop_image(img)
-	
+
 	# Eliminación de bordes del dibujo
 	img = remove_borders(img)
-	
+
 	return img
+
+#Requiered download the model "python -m spacy download model_name"
+#Spacy models 1)"es_core_news_sm" 2)"es_core_news_md" 3)"es_core_news_lg"
+def get_entities(text):
+    nlp = spacy.load("es_core_news_lg") #Carga el modelo
+    doc = nlp(text)
+
+    #Encuentra las entidades en el texto, crea una lista con cada caracter de la entidad y el tipo de entidad
+    entidades = []
+    for sent in reversed(doc.ents):
+        entidad = list(str(nlp(sent.text)))
+        entidad.append(str(sent.label_))
+        entidades.append(entidad)
+
+    #Convierta las entidades a tuplas ("Entidad","tipo")
+    entidad = []
+    for item in entidades:
+        entity = []
+        entity.append('' .join(item[:-1]))
+        entity.append(item[-1])
+        entidad.append(tuple(entity))
+
+    #Lista de fechas encontradas con search_dates
+    listDates=search_dates(text,languages=[ 'es'])
+    for item in listDates:
+        entity = []
+        if item[0] != 'a':
+            entity.append(item[0])
+            entity.append('DATE')
+            entidad.append(tuple(entity))
+
+    return(entidad)
