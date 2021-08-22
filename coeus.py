@@ -258,6 +258,7 @@ def metricasSRF(docOCR, docProcesado):
 	from textdistance import Sorensen #dice
 	from textdistance import Jaccard
 	from textdistance import Hamming
+	from textdistance import Cosine
 
 	jaccard = Jaccard(external=False)
 	jacc= jaccard.similarity(docProcesado,docOCR)
@@ -267,8 +268,11 @@ def metricasSRF(docOCR, docProcesado):
 
 	hamming = Hamming(external=False)
 	ha=hamming.similarity(docProcesado,docOCR)
+	
+	cosine = Cosine(external=False)
+	cos_s=cosine.similarity(docProcesado,docOCR)
 
-	diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice }
+	diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice, 'Cosine': cos_s}
 
 	return diccionario
 
@@ -331,6 +335,7 @@ def compare_transcriptions_unsupervised(texto1, texto2):
     
     return (t1, t2)
 
+<<<<<<< HEAD
 def entity_azure(text,key,endpoint)
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
@@ -345,4 +350,22 @@ try:
 except Exception as err:
     print("Encountered exception. {}".format(err))
 return entidades
+=======
+def entity_azure(text,key,endpoint):
+	from azure.ai.textanalytics import TextAnalyticsClient
+	from azure.core.credentials import AzureKeyCredential
+	
+	entidades=[]
+	credential = AzureKeyCredential(key)
+	client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+	try:
+		documents = [texto]
+		result = client.recognize_entities(documents = documents)[0]
+		for entity in result.entities:
+			entidades.append([entity.text,entity.category])
+	except Exception as err:
+		print("Encountered exception. {}".format(err))
+		
+	return entidades
+>>>>>>> 69bb31c26c57a5864fa930f450ddf9f9f68425a9
 
