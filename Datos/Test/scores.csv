@@ -1,7 +1,10 @@
-Conjunto,Motor OCR,Preprocesamiento,Dice,Jaccard,Hamming,Coseno
-Test,Azure,Otsu,0.85,0.81,0.53,0.85
-Test,Azure,Adaptive,0.85,0.82,0.64,0.85
-Test,Azure,No,0.76,0.74,0.63,0.76
-Test,EasyOCR,Otsu,0.73,0.63,0.4,0.73
-Test,EasyOCR,Adaptive,0.85,0.82,0.64,0.85
-Test,EasyOCR,No,0.77,0.69,0.44,0.77
+Conjunto,Motor OCR,Preprocesamiento,Dice,Jaccard,Coseno
+Test,Azure,Otsu,0.853,0.813,0.853
+Test,Azure,Adaptive,0.857,0.82,0.857
+Test,Azure,No,0.768,0.74,0.768
+,,,,,
+,,,,,
+Conjunto,Motor OCR,Preprocesamiento,Dice,Jaccard,Coseno
+Test,EasyOCR,Otsu,0.735,0.635,0.739
+Test,EasyOCR,Adaptive,0.729,0.629,0.734
+Test,EasyOCR,No,0.775,0.691,0.777

@@ -3,8 +3,7 @@ import pytesseract
 import urllib
 import numpy as np
 import re
-import spacy
-from dateparser.search import search_dates
+
 
 # BGR a GrayScale
 def rgb_to_gray(img):
@@ -49,7 +48,7 @@ def otsu_binarization(cv2_img):
 def adaptive_binarization(cv2_img):
     return cv2.adaptiveThreshold(cv2_img, 255,
                              cv2.ADAPTIVE_THRESH_MEAN_C,
-                             cv2.THRESH_BINARY_INV,21,10)
+                             cv2.THRESH_BINARY_INV,21,7)
 
 def deskew_tesseract(image):
     #  TAKEN FROM: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
@@ -163,35 +162,3 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 	img = remove_borders(img)
 
 	return img
-
-#Requiered download the model "python -m spacy download model_name"
-#Spacy models 1)"es_core_news_sm" 2)"es_core_news_md" 3)"es_core_news_lg"
-def get_entities(text):
-    nlp = spacy.load("es_core_news_lg") #Carga el modelo
-    doc = nlp(text)
-
-    #Encuentra las entidades en el texto, crea una lista con cada caracter de la entidad y el tipo de entidad
-    entidades = []
-    for sent in reversed(doc.ents):
-        entidad = list(str(nlp(sent.text)))
-        entidad.append(str(sent.label_))
-        entidades.append(entidad)
-
-    #Convierta las entidades a tuplas ("Entidad","tipo")
-    entidad = []
-    for item in entidades:
-        entity = []
-        entity.append('' .join(item[:-1]))
-        entity.append(item[-1])
-        entidad.append(tuple(entity))
-
-    #Lista de fechas encontradas con search_dates
-    listDates=search_dates(text,languages=[ 'es'])
-    for item in listDates:
-        entity = []
-        if item[0] != 'a':
-            entity.append(item[0])
-            entity.append('DATE')
-            entidad.append(tuple(entity))
-
-    return(entidad)
