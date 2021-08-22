@@ -309,6 +309,11 @@ def compare_transcriptions_unsupervised(texto1, texto2):
     # Contadores
     t1, t2 = 0, 0
 
+    if texto1 == "" and texto2 != "":
+        return texto2
+    elif texto1 != "" and texto2 == "":
+        return texto1
+
     # Evaluando con textstat
     tstat1 = evaluate_textstat(texto1)
     tstat2 = evaluate_textstat(texto2)
@@ -338,22 +343,22 @@ def compare_transcriptions_unsupervised(texto1, texto2):
         t2 += 1
 
     if t1 > t2:
-		return texto1
-	else:
-		return texto2
+        return texto1
+    else:
+        return texto2
 
 def entity_azure(texto,key,endpoint):
-	from azure.ai.textanalytics import TextAnalyticsClient
-	from azure.core.credentials import AzureKeyCredential
+    from azure.ai.textanalytics import TextAnalyticsClient
+    from azure.core.credentials import AzureKeyCredential
 
-	entidades=[]
-	credential = AzureKeyCredential(key)
-	client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
-	try:
-		documents = [texto]
-		result = client.recognize_entities(documents = documents)[0]
-		for entity in result.entities:
-            if  entity.category=="Person":
+    entidades=[]
+    credential = AzureKeyCredential(key)
+    client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+    try:
+        documents = [texto]
+        result = client.recognize_entities(documents = documents)[0]
+        for entity in result.entities:
+            if entity.category=="Person":
                 categoria="Persona"
             elif entity.category== "PersonType":
                 categoria="Tipo de persona"
@@ -381,16 +386,17 @@ def entity_azure(texto,key,endpoint):
                 categoria="Cantidad"
             elif entity.category=="IPAddress":
                 categoria="Dirección IP"
-			entidades.append([entity.text, categoria])
-	except Exception as err:
-		print("Encountered exception. {}".format(err))
-	return entidades
+
+            entidades.append([entity.text, categoria])
+    except Exception as err:
+    	print("Encountered exception. {}".format(err))
+    return entidades
 
 
 #Requiered download the model "python -m spacy download model_name"
 #Spacy models 1)"es_core_news_sm" 2)"es_core_news_md" 3)"es_core_news_lg"
-def get_entities(text):
-    nlp = spacy.load("es_core_news_lg") #Carga el modelo
+def get_entities(text, model):
+    nlp = model
     doc = nlp(text)
 
     #Encuentra las entidades en el texto, crea una lista con cada caracter de la entidad y el tipo de entidad
@@ -422,27 +428,37 @@ def get_entities(text):
 
     return entidad
 
-def add_entities_json(path_to_json):
+def add_entities_json(path_to_json, path_to_save, credentials):
     f = open(path_to_json)
     predictions_dict = json.load(f)
     f.close()
 
-    for document in predictions_dict.items():
+    # Cargando el modelo de spacy
+    ner_model = spacy.load("es_core_news_md") #Carga el modelo
+
+    for i, document in enumerate(predictions_dict.items()):
         texto_azure = predictions_dict[document[0]]['texto_azure_pp_adaptive']
         texto_easy = predictions_dict[document[0]]['texto_easyocr_np']
 
-        #Get the best text between Azure and Easy-OCR
-        text = compare_transcriptions_unsupervised(texto_azure, texto_easy)
+        if 'entidades' not in predictions_dict[document[0]]:
+            #Get the best text between Azure and Easy-OCR
+            text = compare_transcriptions_unsupervised(texto_azure, texto_easy)
 
-        #Get entities from Azure and Spacy
-        entities_azure = entity_azure(text, key, endpoint)
-        entities_spacy = get_entities(text)
+            if text != "":
+            	#Get entities from Azure and Spacy
+            	entities_azure = entity_azure(text, credentials['key'], credentials['endpoint'])
+            	entities_spacy = get_entities(text, ner_model)
 
-        #Combine the entities
-        entidades = list(merge(entities_azure, entities_spacy))
+            	#Combine the entities
+            	entidades = list(merge(entities_azure, entities_spacy))
+            else:
+            	entidades = []
 
-        predictions_dict[document[0]]['entidades'] = entidades
+            predictions_dict[document[0]]['entidades'] = entidades
+            print("Entidades del documento",i,":",document[0],"han sido procesadas.")
+        else:
+            print("El documento",document[0],"ya contiene entidades.")
 
-    with open('Datos/Test/predictions_entities.json', 'w') as file:
-        json.dump(predictions_dict, file, indent=4)
-        file.close()
+        with open(path_to_save, 'w') as file:
+                json.dump(predictions_dict, file, indent=4)
+                file.close()

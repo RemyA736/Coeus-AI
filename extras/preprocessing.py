@@ -30,8 +30,8 @@ def shadow_removal(img):
 # Eliminación de ruido
 def noise_removal(img):
     kernel = np.ones((1, 1), np.uint8)
-    img = cv2.dilate(img, kernel, iterations=1) # increases the white region in the image
-    img = cv2.erode(img, kernel, iterations=1) # erodes away the boundaries of foreground object
+    img = cv2.dilate(img, kernel, iterations=10) # increases the white region in the image
+    img = cv2.erode(img, kernel, iterations=10) # erodes away the boundaries of foreground object
 
     return img
 
@@ -45,10 +45,10 @@ def otsu_binarization(cv2_img):
                         cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
 
 # Binarización adaptativa
-def adaptive_binarization(cv2_img):
+def adaptive_binarization(cv2_img, t):
     return cv2.adaptiveThreshold(cv2_img, 255,
                              cv2.ADAPTIVE_THRESH_MEAN_C,
-                             cv2.THRESH_BINARY_INV,21,7)
+                             cv2.THRESH_BINARY_INV,21,t)
 
 def deskew_tesseract(image):
     #  TAKEN FROM: https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
@@ -136,7 +136,7 @@ def crop_image(image):
             image = image[y:y+h, x:x+w]
     return image
 
-def preprocess(image, binarization='otsu', orientation='cv2'):
+def preprocess(image, binarization='otsu', orientation='cv2', t=10):
 	img = rgb_to_gray(image)
 	img = downscale_img(img, 0.7)
 	img = shadow_removal(img)
@@ -146,7 +146,7 @@ def preprocess(image, binarization='otsu', orientation='cv2'):
 		T, img_otsu = otsu_binarization(img)
 		img = invert(img_otsu)
 	else:
-		img_binaria = adaptive_binarization(img)
+		img_binaria = adaptive_binarization(img, t)
 		img = invert(img_binaria)
 
 	# Corrección de orientación
