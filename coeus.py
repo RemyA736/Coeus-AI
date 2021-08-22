@@ -1,6 +1,8 @@
 import os
 import json
 from os.path import splitext
+import spacy
+from dateparser.search import search_dates
 
 def gcloud_text_detection(path):
     import io
@@ -333,7 +335,10 @@ def compare_transcriptions_unsupervised(texto1, texto2):
     elif evaluate_text_languagetool(texto2) < evaluate_text_languagetool(texto1):
         t2 += 1
     
-    return (t1, t2)
+    if t1 > t2:
+		return texto1
+	else:
+		return texto2
 
 def entity_azure(text,key,endpoint):
 	from azure.ai.textanalytics import TextAnalyticsClient
@@ -351,4 +356,36 @@ def entity_azure(text,key,endpoint):
 		print("Encountered exception. {}".format(err))
 		
 	return entidades
+
+#Requiered download the model "python -m spacy download model_name"
+#Spacy models 1)"es_core_news_sm" 2)"es_core_news_md" 3)"es_core_news_lg"
+def get_entities(text):
+    nlp = spacy.load("es_core_news_lg") #Carga el modelo
+    doc = nlp(text)
+
+    #Encuentra las entidades en el texto, crea una lista con cada caracter de la entidad y el tipo de entidad
+    entidades = []
+    for sent in reversed(doc.ents):
+        entidad = list(str(nlp(sent.text)))
+        entidad.append(str(sent.label_))
+        entidades.append(entidad)
+
+    #Convierta las entidades a tuplas ("Entidad","tipo")
+    entidad = []
+    for item in entidades:
+        entity = []
+        entity.append('' .join(item[:-1]))
+        entity.append(item[-1])
+        entidad.append(tuple(entity))
+
+    #Lista de fechas encontradas con search_dates
+    listDates=search_dates(text,languages=['es'])
+    for item in listDates:
+        entity = []
+        if item[0] != 'a':
+            entity.append(item[0])
+            entity.append('DATE')
+            entidad.append(tuple(entity))
+
+    return entidad
 
