@@ -340,22 +340,6 @@ def compare_transcriptions_unsupervised(texto1, texto2):
 	else:
 		return texto2
 
-<<<<<<< HEAD
-def entity_azure(text,key,endpoint)
-from azure.ai.textanalytics import TextAnalyticsClient
-from azure.core.credentials import AzureKeyCredential
-entidades=[]
-credential = AzureKeyCredential(key)
-client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
-try:
-    documents = [texto]
-    result = client.recognize_entities(documents = documents, language='es')[0]
-    for entity in result.entities:
-        entidades.append([entity.text,entity.category])
-except Exception as err:
-    print("Encountered exception. {}".format(err))
-return entidades
-=======
 def entity_azure(text,key,endpoint):
 	from azure.ai.textanalytics import TextAnalyticsClient
 	from azure.core.credentials import AzureKeyCredential
@@ -367,12 +351,39 @@ def entity_azure(text,key,endpoint):
 		documents = [texto]
 		result = client.recognize_entities(documents = documents)[0]
 		for entity in result.entities:
-			entidades.append([entity.text,entity.category])
+            if  entity.category=="Person":
+                categoria="Persona"
+            elif entity.category== "PersonType":
+                categoria="Tipo de persona"
+            elif entity.category== "Location":
+                categoria="Lugar"
+            elif entity.category== "Organization":
+                categoria="Organización"
+            elif entity.category== "Event":
+                categoria="Evento"
+            elif entity.category== "Product":
+                categoria="Producto"
+            elif entity.category== "Skill":
+                categoria="Habilidad"
+            elif entity.category== "Address":
+                categoria="Dirección"
+            elif entity.category== "PhoneNumber":
+                categoria="Numero de teléfono"
+            elif entity.category== "Email":
+                categoria="Correo electronico"
+            elif entity.category== "URL":
+                categoria="URL"
+            elif entity.category== "DateTime":
+                categoria="Fecha"
+            elif entity.category== "Quantity":
+                categoria="Cantidad"
+            elif entity.category=="IPAddress":
+                categoria="Dirección IP"
+			entidades.append([entity.text, entidad])
 	except Exception as err:
 		print("Encountered exception. {}".format(err))
-		
 	return entidades
->>>>>>> 69bb31c26c57a5864fa930f450ddf9f9f68425a9
+
 
 #Requiered download the model "python -m spacy download model_name"
 #Spacy models 1)"es_core_news_sm" 2)"es_core_news_md" 3)"es_core_news_lg"
