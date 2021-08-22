@@ -28,7 +28,7 @@ def gcloud_text_detection(path):
 
     return str_text
 
-def metricas(docOCR, docProcesado): 
+def metricas(docOCR, docProcesado):
     import fastwer
     import pandas as pd
     from os.path import splitext
@@ -50,11 +50,11 @@ def metricas(docOCR, docProcesado):
     hamming = textdistance.Hamming(external=False)
     ha=hamming.similarity(docProce,docOCR)
     filename, extension = splitext(docOCR)
-    
+
     df = pd.DataFrame(columns = ['img_filename', 'Hamming', 'Jaccard', 'Dice'])
     df = df.append({'img_filename': filename, 'Hamming': ha, 'Jaccard': jacc,'Dice': dice }, ignore_index=True)
-    print(df) 
-	
+    print(df)
+
 def azure_text_detection(path):
     from azure.cognitiveservices.vision.computervision import ComputerVisionClient
     from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
@@ -111,7 +111,7 @@ def spellCheck(document_text):
         textoSC.write(tool.correct(cadena))
     fin.close()
     textoSC.close()
-    
+
 def tesseract_text_detection(path):
     import pytesseract
     import cv2
@@ -203,7 +203,7 @@ def rotate_documents(path_to_docs_dir):
 def languagetool_spell_check(document_text):
     import language_tool_python
     tool = language_tool_python.LanguageTool('es')
-	
+
     return tool.correct(document_text)
 
 def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
@@ -256,7 +256,7 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
     else:
         print("ERROR: El archivo JSON especificado no existe.")
 
-def metricasSRF(docOCR, docProcesado): 
+def metricasSRF(docOCR, docProcesado):
 	from textdistance import Sorensen #dice
 	from textdistance import Jaccard
 	from textdistance import Hamming
@@ -270,7 +270,7 @@ def metricasSRF(docOCR, docProcesado):
 
 	hamming = Hamming(external=False)
 	ha=hamming.similarity(docProcesado,docOCR)
-	
+
 	cosine = Cosine(external=False)
 	cos_s=cosine.similarity(docProcesado,docOCR)
 
@@ -281,60 +281,60 @@ def metricasSRF(docOCR, docProcesado):
 def evaluate_text_languagetool(texto):
     import language_tool_python
     tool = language_tool_python.LanguageTool('es_MX')
-    
+
     matches = tool.check(texto)
-    
+
     return len(matches)
 
 def evaluate_textstat(texto):
     import textstat
     textstat.set_lang('es')
-    
+
     # Índice de perspicuidad de Szigriszt-Pazos
     szigriszt_pazos = textstat.szigriszt_pazos(texto)
-    
+
     # Fórmula de comprensibilidad de Gutiérrez de Polini
     gutierrez_polini = textstat.gutierrez_polini(texto)
-    
+
     # Conteo de monosílabos
     monosilabas = textstat.monosyllabcount(texto)
-    
-    return {'szigriszt_pazos': szigriszt_pazos, 
+
+    return {'szigriszt_pazos': szigriszt_pazos,
            'gutierrez_polini': gutierrez_polini,
            'monosilabas': monosilabas}
 
 def compare_transcriptions_unsupervised(texto1, texto2):
     # Contadores
     t1, t2 = 0, 0
-    
+
     # Evaluando con textstat
     tstat1 = evaluate_textstat(texto1)
     tstat2 = evaluate_textstat(texto2)
-    
-    # Índice de perspicuidad de Szigriszt-Pazos 
+
+    # Índice de perspicuidad de Szigriszt-Pazos
     if tstat1['szigriszt_pazos'] > tstat2['szigriszt_pazos']:
         t1 += 1
     elif tstat2['szigriszt_pazos'] > tstat1['szigriszt_pazos']:
         t2 += 1
-    
+
     # Fórmula de comprensibilidad de Gutiérrez de Polini
     if tstat1['gutierrez_polini'] > tstat2['gutierrez_polini']:
         t1 += 1
     elif tstat2['gutierrez_polini'] > tstat1['gutierrez_polini']:
         t2 += 1
-    
+
     # Conteo de monosílabos
     if tstat1['monosilabas'] < tstat2['monosilabas']:
         t1 += 1
     elif tstat2['monosilabas'] < tstat1['monosilabas']:
         t2 += 1
-    
+
     # Conteo de errores detectados por language tool
     if evaluate_text_languagetool(texto1) < evaluate_text_languagetool(texto2):
         t1 += 1
     elif evaluate_text_languagetool(texto2) < evaluate_text_languagetool(texto1):
         t2 += 1
-    
+
     if t1 > t2:
 		return texto1
 	else:
@@ -343,7 +343,7 @@ def compare_transcriptions_unsupervised(texto1, texto2):
 def entity_azure(text,key,endpoint):
 	from azure.ai.textanalytics import TextAnalyticsClient
 	from azure.core.credentials import AzureKeyCredential
-	
+
 	entidades=[]
 	credential = AzureKeyCredential(key)
 	client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
@@ -356,7 +356,7 @@ def entity_azure(text,key,endpoint):
             elif entity.category== "PersonType":
                 categoria="Tipo de persona"
             elif entity.category== "Location":
-                categoria="Lugar"
+                categoria="Localización"
             elif entity.category== "Organization":
                 categoria="Organización"
             elif entity.category== "Event":
@@ -399,11 +399,15 @@ def get_entities(text):
         entidades.append(entidad)
 
     #Convierta las entidades a tuplas ("Entidad","tipo")
+    #Convierta las entidades a tuplas ("Entidad","tipo")
+    tipo_entidad = ['Localización','Organización','Persona','Producto']
+    tipos = ['LOC','ORG','PER','MISC']
     entidad = []
     for item in entidades:
         entity = []
         entity.append('' .join(item[:-1]))
-        entity.append(item[-1])
+        tipo_ent = tipo_entidad[tipos.index(item[-1])]
+        entity.append(tipo_ent)
         entidad.append(tuple(entity))
 
     #Lista de fechas encontradas con search_dates
@@ -416,4 +420,3 @@ def get_entities(text):
             entidad.append(tuple(entity))
 
     return entidad
-
