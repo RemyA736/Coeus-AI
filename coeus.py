@@ -5,6 +5,12 @@ import spacy
 from dateparser.search import search_dates
 from extras.preprocessing import *
 from heapq import merge
+import gc
+import textstat
+import language_tool_python
+
+
+tool = language_tool_python.LanguageTool('es_MX')
 
 def gcloud_text_detection(path):
     import io
@@ -259,37 +265,34 @@ def json_to_txt_transcriptions(path_to_json, path_to_docs_dir, doc_types=[]):
         print("ERROR: El archivo JSON especificado no existe.")
 
 def metricasSRF(docOCR, docProcesado):
-	from textdistance import Sorensen #dice
-	from textdistance import Jaccard
-	from textdistance import Hamming
-	from textdistance import Cosine
+    from textdistance import Sorensen #dice
+    from textdistance import Jaccard
+    from textdistance import Hamming
+    from textdistance import Cosine
 
-	jaccard = Jaccard(external=False)
-	jacc= jaccard.similarity(docProcesado,docOCR)
+    jaccard = Jaccard(external=False)
+    jacc= jaccard.similarity(docProcesado,docOCR)
 
-	sorensen = Sorensen(external=False)
-	dice=sorensen.similarity(docProcesado,docOCR)
+    sorensen = Sorensen(external=False)
+    dice=sorensen.similarity(docProcesado,docOCR)
 
-	hamming = Hamming(external=False)
-	ha=hamming.similarity(docProcesado,docOCR)
+    hamming = Hamming(external=False)
+    ha=hamming.similarity(docProcesado,docOCR)
 
-	cosine = Cosine(external=False)
-	cos_s=cosine.similarity(docProcesado,docOCR)
+    cosine = Cosine(external=False)
+    cos_s=cosine.similarity(docProcesado,docOCR)
 
-	diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice, 'Cosine': cos_s}
+    diccionario = {'Hamming' : ha, 'Jaccard' : jacc, 'Dice': dice, 'Cosine': cos_s}
 
-	return diccionario
+    return diccionario
 
 def evaluate_text_languagetool(texto):
-    import language_tool_python
-    tool = language_tool_python.LanguageTool('es_MX')
 
     matches = tool.check(texto)
 
     return len(matches)
 
 def evaluate_textstat(texto):
-    import textstat
     textstat.set_lang('es')
 
     # Índice de perspicuidad de Szigriszt-Pazos
@@ -389,7 +392,7 @@ def entity_azure(texto,key,endpoint):
 
             entidades.append([entity.text, categoria])
     except Exception as err:
-    	print("Encountered exception. {}".format(err))
+        print("Encountered exception. {}".format(err))
     return entidades
 
 
@@ -419,12 +422,15 @@ def get_entities(text, model):
 
     #Lista de fechas encontradas con search_dates
     listDates=search_dates(text,languages=['es'])
-    for item in listDates:
-        entity = []
-        if item[0] != 'a':
-            entity.append(item[0])
-            entity.append('Fecha')
-            entidad.append(entity)
+    if listDates:
+        for item in listDates:
+            entity = []
+            if item[0] != 'a':
+                entity.append(item[0])
+                entity.append('Fecha')
+                entidad.append(entity)
+    else:
+        pass
 
     return entidad
 
@@ -445,14 +451,14 @@ def add_entities_json(path_to_json, path_to_save, credentials):
             text = compare_transcriptions_unsupervised(texto_azure, texto_easy)
 
             if text != "":
-            	#Get entities from Azure and Spacy
-            	entities_azure = entity_azure(text, credentials['key'], credentials['endpoint'])
-            	entities_spacy = get_entities(text, ner_model)
+                #Get entities from Azure and Spacy
+                entities_azure = entity_azure(text, credentials['key'], credentials['endpoint'])
+                entities_spacy = get_entities(text, ner_model)
 
-            	#Combine the entities
-            	entidades = list(merge(entities_azure, entities_spacy))
+                #Combine the entities
+                entidades = list(merge(entities_azure, entities_spacy))
             else:
-            	entidades = []
+                entidades = []
 
             predictions_dict[document[0]]['entidades'] = entidades
             print("Entidades del documento",i,":",document[0],"han sido procesadas.")
