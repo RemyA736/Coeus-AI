@@ -339,7 +339,7 @@ credential = AzureKeyCredential(key)
 client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
 try:
     documents = [texto]
-    result = client.recognize_entities(documents = documents)[0]
+    result = client.recognize_entities(documents = documents, language='es')[0]
     for entity in result.entities:
         entidades.append([entity.text,entity.category])
 except Exception as err:
