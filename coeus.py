@@ -440,7 +440,6 @@ def add_entities_json(path_to_json):
 
         #Combine the entities
         entidades = list(merge(entities_azure, entities_spacy))
-        print(entidades)
 
         predictions_dict[document[0]]['entidades'] = entidades
 
