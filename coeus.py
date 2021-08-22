@@ -3,6 +3,8 @@ import json
 from os.path import splitext
 import spacy
 from dateparser.search import search_dates
+from extras.preprocessing import *
+from heapq import merge
 
 def gcloud_text_detection(path):
     import io
@@ -340,7 +342,7 @@ def compare_transcriptions_unsupervised(texto1, texto2):
 	else:
 		return texto2
 
-def entity_azure(text,key,endpoint):
+def entity_azure(texto,key,endpoint):
 	from azure.ai.textanalytics import TextAnalyticsClient
 	from azure.core.credentials import AzureKeyCredential
 
@@ -399,7 +401,6 @@ def get_entities(text):
         entidades.append(entidad)
 
     #Convierta las entidades a tuplas ("Entidad","tipo")
-    #Convierta las entidades a tuplas ("Entidad","tipo")
     tipo_entidad = ['Localización','Organización','Persona','Producto']
     tipos = ['LOC','ORG','PER','MISC']
     entidad = []
@@ -408,7 +409,7 @@ def get_entities(text):
         entity.append('' .join(item[:-1]))
         tipo_ent = tipo_entidad[tipos.index(item[-1])]
         entity.append(tipo_ent)
-        entidad.append(tuple(entity))
+        entidad.append(entity)
 
     #Lista de fechas encontradas con search_dates
     listDates=search_dates(text,languages=['es'])
@@ -416,7 +417,33 @@ def get_entities(text):
         entity = []
         if item[0] != 'a':
             entity.append(item[0])
-            entity.append('DATE')
-            entidad.append(tuple(entity))
+            entity.append('Fecha')
+            entidad.append(entity)
 
     return entidad
+
+def add_entities_json(path_to_json):
+    f = open(path_to_json)
+    predictions_dict = json.load(f)
+    f.close()
+
+    for document in predictions_dict.items():
+        texto_azure = predictions_dict[document[0]]['texto_azure_pp_adaptive']
+        texto_easy = predictions_dict[document[0]]['texto_easyocr_np']
+
+        #Get the best text between Azure and Easy-OCR
+        text = compare_transcriptions_unsupervised(texto_azure, texto_easy)
+
+        #Get entities from Azure and Spacy
+        entities_azure = entity_azure(text, key, endpoint)
+        entities_spacy = get_entities(text)
+
+        #Combine the entities
+        entidades = list(merge(entities_azure, entities_spacy))
+        print(entidades)
+
+        predictions_dict[document[0]]['entidades'] = entidades
+
+    with open('Datos/Test/predictions_entities.json', 'w') as file:
+        json.dump(predictions_dict, file, indent=4)
+        file.close()
