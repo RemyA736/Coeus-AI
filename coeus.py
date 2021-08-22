@@ -379,7 +379,7 @@ def entity_azure(text,key,endpoint):
                 categoria="Cantidad"
             elif entity.category=="IPAddress":
                 categoria="Dirección IP"
-			entidades.append([entity.text, entidad])
+			entidades.append([entity.text, categoria])
 	except Exception as err:
 		print("Encountered exception. {}".format(err))
 	return entidades
