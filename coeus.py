@@ -680,3 +680,22 @@ def json_to_csv_2b(path_to_json, path_to_2b):
                 writer.writerow(row)
 
             print("2B: Documento", document[0], 'procesado.')
+
+def json_to_txt(path_to_json, path_to_txtdir):
+    # Se carga el archivo JSON
+    f = open(path_to_json)
+    predictions_dict = json.load(f)
+    f.close()
+
+    for i, document in enumerate(predictions_dict.items()):
+        texto = document[1]['texto_azure_pp_adaptive']
+
+        # Path to text file
+        doc_name = document[0][:-3]
+        doc_name += "txt"
+        out_path = os.path.join(path_to_txtdir, doc_name)
+
+        # Guardando el documento en TXT
+        txt_file = open(out_path, 'w')
+        n = txt_file.write(texto)
+        txt_file.close()
