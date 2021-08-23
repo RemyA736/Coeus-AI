@@ -2,6 +2,7 @@ import os
 import re
 import gc
 import json
+import csv
 import spacy
 import textstat
 import language_tool_python
@@ -498,9 +499,9 @@ def extract_expediente(texto):
     mc = c.most_common(1)
 
     if len(mc) > 0:
-        return mc[0]
+        return mc[0][0]
     else:
-        return "Exp. no encontrado"
+        return "No detectado"
 
 def add_entities_json(path_to_json, path_to_save, credentials):
     f = open(path_to_json)
@@ -611,3 +612,71 @@ def inference(path_to_docs, path_to_procs, path_to_predictions):
         f = open(path_to_predictions, "w")
         json.dump(predictions_dict, f, indent=4)
         f.close()
+
+def json_to_csv_2a(path_to_json, path_to_2a):
+    # Se carga el archivo JSON
+    f = open(path_to_json)
+    predictions_dict = json.load(f)
+    f.close()
+
+    with open(path_to_2a, 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+
+        # Escribiendo el encabezado
+        header = ['filename', 'text']
+        writer.writerow(header)
+
+        # Iterando sobre los documentos en el JSON
+        for i, document in enumerate(predictions_dict.items()):
+            # Extrayendo el nombre del documento
+            filename = document[0]
+
+            # Seleccionando el mejor texto con la métrica compuesta ponderada
+            text = compare_transcriptions_unsupervised(document[1]['texto_easyocr_np'], document[1]['texto_azure_pp_adaptive'])
+
+            # Extrayendo el expediente
+            expediente = document[1]['expediente']
+
+            # Preparando la cadena para el CSV
+            str_f = expediente+': '+text
+
+            # Escribiendo los datos al CSV
+            row = [filename, str_f]
+            writer.writerow(row)
+
+            print("2A: Documento", document[0], 'procesado.')
+
+def json_to_csv_2b(path_to_json, path_to_2b):
+    # Se carga el archivo JSON
+    f = open(path_to_json)
+    predictions_dict = json.load(f)
+    f.close()
+
+    with open(path_to_2b, 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+
+        # Escribiendo el encabezado
+        header = ['filename', 'label', 'class']
+        writer.writerow(header)
+
+        # Iterando sobre los documentos en el JSON
+        for i, document in enumerate(predictions_dict.items()):
+            # Extrayendo el nombre del documento
+            filename = document[0]
+
+            # Obteniendo las entidades
+            entidades = document[1]['entidades']
+
+            # Por cada entidad en el documento
+            for entity in entidades:
+                label = entity[0]
+                clase = entity[1]
+
+                if clase == 'Cantidad':
+                    continue
+
+                # Escribiendo los datos al CSV
+                row = [filename, label, clase]
+                writer.writerow(row)
+
+            print("2B: Documento", document[0], 'procesado.')
