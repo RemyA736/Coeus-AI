@@ -1,16 +1,61 @@
 import os
-import json
-from os.path import splitext
-import spacy
-from dateparser.search import search_dates
-from extras.preprocessing import *
-from heapq import merge
+import re
 import gc
+import json
+import spacy
 import textstat
 import language_tool_python
 
+from os.path import splitext
+from heapq import merge
+from collections import Counter
+from dateparser.search import search_dates
+
+from extras.preprocessing import *
+
 
 tool = language_tool_python.LanguageTool('es_MX')
+
+class Documento:
+    """
+    Clase que contiene todos los datos necesarios para describir y analizar un Documento.
+    """
+    def __init__(self, nombre_archivo, conjunto, texto_manual):
+        # Datos proporcionados originalmente
+        self.nombre_archivo = nombre_archivo
+        self.conjunto = conjunto
+        self.texto_manual = texto_manual
+
+        # Datos obtenidos automáticamente
+        self.texto_ocr_default = None
+        self.texto_ocr_mejorado = None
+
+        # PLN
+        self.personas = []
+        self.organizaciones = []
+        self.lugares = []
+        self.fechas = []
+
+    def get_ruta_archivo(self):
+        return os.path.join(self.conjunto, self.nombre_archivo)
+
+    def set_texto_ocr_default(self, texto):
+        self.texto_ocr_default = texto
+
+    def set_texto_ocr_mejorado(self, texto):
+        self.texto_ocr_mejorado = texto
+
+    def add_persona(self, person):
+        self.personas.append(person)
+
+    def add_organizacion(self, organizacion):
+        self.organizaciones.append(organizacion)
+
+    def add_lugar(self, lugar):
+        self.lugares.append(lugar)
+
+    def add_fecha(self, fecha):
+        self.fechas.append(fecha)
 
 def gcloud_text_detection(path):
     import io
@@ -434,6 +479,29 @@ def get_entities(text, model):
 
     return entidad
 
+def extract_expediente(texto):
+    # Se extraen todos los expedientes presentes en el documento
+    exp = re.compile('[bBjJeExXpPzZ ][eE xX pP zZ][eE xX pP zZ][-. :].{1,12}')
+    expedientes = exp.findall(texto)
+
+    filtered = []
+
+    # Ligero filtrado de los expedientes
+    for i, element in enumerate(expedientes):
+        element = element.replace(" ", "")
+        element = element.replace("'", "")
+        element = element.replace("~", "-")
+        filtered.append(element)
+
+    # Se obtiene el expediente más común
+    c = Counter(filtered)
+    mc = c.most_common(1)
+
+    if len(mc) > 0:
+        return mc[0]
+    else:
+        return "Exp. no encontrado"
+
 def add_entities_json(path_to_json, path_to_save, credentials):
     f = open(path_to_json)
     predictions_dict = json.load(f)
@@ -457,14 +525,89 @@ def add_entities_json(path_to_json, path_to_save, credentials):
 
                 #Combine the entities
                 entidades = list(merge(entities_azure, entities_spacy))
+
+                # Extrayendo el expediente
+                expediente = extract_expediente(text)
             else:
+                expediente = ''
                 entidades = []
 
+            # Se añaden las entidades al diccionario
             predictions_dict[document[0]]['entidades'] = entidades
-            print("Entidades del documento",i,":",document[0],"han sido procesadas.")
+
+            # Se añade el número de expediente
+            predictions_dict[document[0]]['expediente'] = expediente
+
+            print("Entidades del documento",i+1,":",document[0],"han sido procesadas.")
         else:
             print("El documento",document[0],"ya contiene entidades.")
 
         with open(path_to_save, 'w') as file:
                 json.dump(predictions_dict, file, indent=4)
                 file.close()
+
+def inference(path_to_docs, path_to_procs, path_to_predictions):
+    if os.path.isfile(path_to_predictions):
+        print("El archivo de transcripciones ya existe:", path_to_predictions)
+        f = open(path_to_predictions)
+        predictions_dict = json.load(f)
+        f.close()
+    else:
+        predictions_dict = {}
+        # Primer paso, para crear la estructura
+        for i, filename in enumerate(os.listdir(path_to_docs)):
+            predictions_dict[filename] = {'expediente': "",
+                                          'texto_easyocr_np': "",
+                                          'texto_azure_pp_adaptive': ""}
+
+        # Guardando avances
+        f = open(path_to_predictions, "w")
+        json.dump(predictions_dict, f, indent=4)
+        f.close()
+        print("El archivo de transcripciones se ha creado con éxito:", path_to_predictions)
+
+    # Extracción de texto con EasyOCR
+    for i, filename in enumerate(os.listdir(path_to_docs)):
+        texto_easyocr_np = ''
+
+        # Ruta al archivo
+        np_path = os.path.join(path_to_docs, filename)
+
+        # Si el OCR de EasyOCR aún no ha sido extraído
+        if predictions_dict[filename]['texto_easyocr_np'] == "":
+            try:
+                texto_easyocr_np = easyocr_text_detection(np_path) # sin pre-procesamiento
+            except:
+                print("La extracción de texto (EasyOCR) falló para el documento", filename)
+
+        # Añadiendo las predicciones al diccionario
+        predictions_dict[filename]['texto_easyocr_np'] = texto_easyocr_np
+        print("EasyOCR de documento", filename, "finalizado con éxito.")
+
+        # Guardando avances
+        f = open(path_to_predictions, "w")
+        json.dump(predictions_dict, f, indent=4)
+        f.close()
+
+    # Extracción de texto con Azure
+    for i, filename in enumerate(os.listdir(path_to_procs)):
+        texto_azure_pp_adaptive = ''
+
+        # Ruta al archivo
+        pp_adaptive_path = os.path.join(path_to_procs, filename)
+
+        # Si el OCR de Azure aún no ha sido extraído
+        if predictions_dict[filename]['texto_azure_pp_adaptive'] == "":
+            try:
+                texto_azure_pp_adaptive = azure_text_detection(pp_adaptive_path) # binarización adaptativa
+            except:
+                print("La extracción de texto (Azure) falló para el documento", filename)
+
+        # Añadiendo las predicciones al diccionario
+        predictions_dict[filename]['texto_azure_pp_adaptive'] = texto_azure_pp_adaptive
+        print("Azure OCR de documento", filename, "finalizado con éxito.")
+
+        # Guardando avances
+        f = open(path_to_predictions, "w")
+        json.dump(predictions_dict, f, indent=4)
+        f.close()
