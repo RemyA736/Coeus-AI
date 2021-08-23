@@ -39,3 +39,7 @@ los comentarios en las libretas correspondientes.
 3. El software de Open Semantic Search es de código abierto. Por lo tanto, nuestra configuración específica para el español, así como nuestra traducción
 de la interfaz gráfica también serán de código abierto. Sin embargo, es trabajo futuro,
 4. Un ejemplo del motor de búsqueda se puede encontrar a continuación: ![Figura 3](assets/Search.png).
+
+### Pitch
+- Los slides para el pitch se pueden revisar en: PENDIENTE
+- El video del pitch se puede consultar en: PENDIENTE
