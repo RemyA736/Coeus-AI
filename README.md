@@ -31,7 +31,7 @@ los comentarios en las libretas correspondientes.
 ### Cómo utilizar Coeus AI: Flujo de datos general
 1. El código, las descripciones, así como el pipiline general de este paso están disponibles en la libreta [CoeusAI-Principal](CoeusAI-Principal.ipynb)
 2. La libreta [CoeusAI-Principal.ipynb](CoeusAI-Principal.ipynb) se puede ejecutar haciendo uso de Jupyter Notebooks o JupyterLab.
-3. Un ejemplo del flujo general se puede encontrar a continuación: ![Figura 2](assets/Desarrollo.png).
+3. El diagrama del flujo general se puede encontrar a continuación: ![Figura 2](assets/Desarrollo.png).
 
 ### Cómo utilizar Coeus AI: Motor de búsqueda semántico.
 1. El servicio de búsqueda semántico basado en Open Semantic Search está disponible en: http://coeus-ai.ddns.net/search/
