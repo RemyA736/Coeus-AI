@@ -20,6 +20,11 @@ Coeus AI es un sistema robusto y flexible para el análisis inteligente de docum
 - El archivo CSV con los datos para el Reto 2A se puede encontrar en [2A.csv](Datos/Evaluacion/2A.csv).
 - El archivo CSV con los datos para el Reto 2B se puede encontrar en [2B.csv](Datos/Evaluacion/2B.csv).
 
+### Pitch
+- Los slides para el pitch se pueden revisar en: [Slides_Pitch](Slides_Pitch.pdf)
+- El video del pitch se puede consultar en: https://www.youtube.com/watch?v=02fH1SJlJ7A
+- La prueba de concepto de nuestro producto mínimo viable se puede utilizar desde: http://coeus-ai.ddns.net/search/
+
 ## Pipeline
 A continuación se describen de forma general los flujos de trabajo realizados por Coeus AI. Si se desea información detallada, es posible consultar
 los comentarios en las libretas correspondientes.
@@ -43,7 +48,3 @@ los comentarios en las libretas correspondientes.
 3. El software de Open Semantic Search es de código abierto. Por lo tanto, nuestra configuración específica para el español, así como nuestra traducción
 de la interfaz gráfica también serán de código abierto. Sin embargo, es trabajo futuro,
 4. Un ejemplo del motor de búsqueda se puede encontrar a continuación: ![Figura 3](assets/Search.png).
-
-### Pitch
-- Los slides para el pitch se pueden revisar en: PENDIENTE
-- El video del pitch se puede consultar en: PENDIENTE
