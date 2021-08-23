@@ -16,6 +16,10 @@ Coeus AI es un sistema robusto y flexible para el análisis inteligente de docum
 - Extracción de texto
 - Un motor de búsqueda semántico capaz de comprender consultas en lenguaje natural y retornar los documentos más adecuados.
 
+## Datos de evaluación:
+- El archivo CSV con los datos para el Reto 2A se puede encontrar en [2A.csv](Datos/Evaluacion/2A.csv).
+- El archivo CSV con los datos para el Reto 2B se puede encontrar en [2B.csv](Datos/Evaluacion/2B.csv).
+
 ## Pipeline
 A continuación se describen de forma general los flujos de trabajo realizados por Coeus AI. Si se desea información detallada, es posible consultar
 los comentarios en las libretas correspondientes.
